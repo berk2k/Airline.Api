@@ -57,6 +57,7 @@ namespace Airline.Api.Services
                 
                 var flight = new Flight
                 {
+                    FlightNumber = request.FlightNumber,
                     Departure = request.From,
                     Destination = request.To,
                     DepartureDate = request.DepartureDate,
@@ -75,6 +76,44 @@ namespace Airline.Api.Services
                 return false;
             }
         }
+
+        public async Task<List<QueryFlightDTO>> QueryFlights(DateTime date, string from, string to, int pageNumber, int pageSize)
+        {
+            try
+            {
+                
+                var flights = await _context.Flights
+                    .Where(f => f.DepartureDate.Date == date.Date && f.Departure == from && f.Destination == to)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(f => new QueryFlightDTO
+                    {
+                        Departure = f.Departure,
+                        Destination = f.Destination,
+                        DepartureDate = f.DepartureDate,
+                        AvailableSeats = f.AvailableSeats
+                    })
+                    .ToListAsync();
+
+                
+                var availableFlights = flights.Where(f => f.AvailableSeats > 0).ToList();
+
+                
+                if (availableFlights.Count == 0)
+                {
+                    Console.WriteLine("All flights are fully booked.");
+                }
+
+                return availableFlights;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return new List<QueryFlightDTO>();
+            }
+        }
+
+
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Airline.Api.Models.DTO;
+using Airline.Api.Services;
 using Airline.Api.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,5 +57,27 @@ namespace Airline.Api.Controllers
                 });
             }
         }
+
+        [HttpGet("queryFlights")]
+        public async Task<IActionResult> QueryFlights([FromQuery] DateTime date, [FromQuery] string from, [FromQuery] string to, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var flights = await _flightService.QueryFlights(date, from, to, pageNumber, pageSize);
+
+                if (!flights.Any())
+                {
+                    return NotFound("No flights found or all flights are fully booked.");
+                }
+
+                return Ok(flights);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
     }
 }

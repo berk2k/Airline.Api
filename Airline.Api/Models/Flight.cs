@@ -29,5 +29,7 @@ namespace Airline.Api.Models
 
         public string DaysOfWeek { get; set; }
 
+        public ICollection<Ticket> Tickets { get; set; }
+
     }
 }
